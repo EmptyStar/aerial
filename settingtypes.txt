@@ -1,0 +1,20 @@
+# Enable or disable wooden wings
+aerial_wings_wood (Enable wooden wings?) bool true
+
+# Enable or disable cactus wings
+aerial_wings_cactus (Enable cactus wings?) bool true
+
+# Enable or disable bronze wings
+aerial_wings_bronze (Enable bronze wings?) bool true
+
+# Enable or disable steel wings
+aerial_wings_steel (Enable steel wings?) bool true
+
+# Enable or disable golden wings
+aerial_wings_gold (Enable golden wings?) bool true
+
+# Enable or disable diamond wings
+aerial_wings_diamond (Enable diamond wings?) bool true
+
+# The number of milliseconds between player flight checks. Lower values make flight more responsive but increase load on the server; higher values will cause less stress on the server but may cause players to notice delays in flight-related movements.
+aerial_flight_tick_ms (Milliseconds per flight tick) int 125 50 1000
