@@ -171,7 +171,7 @@ Flight = {
 				flight.speed = wing.flyspeed
 				flight.entity = wings_entity
 				flight.state = Flight.GROUNDED
-		
+
 				-- Grant flight if wings are capable of flight, revoke flight otherwise
 				if wing.can_fly then
 					flight:grant()
@@ -184,7 +184,7 @@ Flight = {
 				groups.fall_damage_add_percent = -9001
 				player:set_armor_groups(groups)
 			end,
-		
+
 			-- Unequip wings
 			unequip = function(flight,item,swap)
 				-- Remove existing wing model from player
@@ -212,7 +212,7 @@ Flight = {
 					flight.swapped = true
 				end
 			end,
-		
+
 			-- Start flying
 			start = function(flight)
 				-- Add wing speed if player is flying
@@ -226,7 +226,7 @@ Flight = {
 				-- Animate wings while in flight
 				flight.entity:set_animation({x = 0, y = 19}, 24)
 			end,
-		
+
 			-- Stop flying
 			stop = function(flight)
 				-- Remove wing speed if player is flying
@@ -240,14 +240,14 @@ Flight = {
 				-- Wings are still when not in flight
 				flight.entity:set_animation()
 			end,
-		
+
 			-- Grant fly privilege to player if flyspeed is non-zero
 			grant = function(flight)
 				local privs = minetest.get_player_privs(playername)
 				privs.fly = true
 				minetest.set_player_privs(playername, privs)
 			end,
-		
+
 			-- Revoke fly privilege from player
 			revoke = function(flight)
 				local privs = minetest.get_player_privs(playername)
@@ -306,7 +306,7 @@ function nodeIsLiquid(coords)
 end
 
 -- Flight detection and state management
-local interval = tonumber(minetest.settings:get("aerial_flight_tick_ms")) / 1000
+local interval = tonumber(minetest.settings:get("aerial_flight_tick_ms") or 125) / 1000
 local stime = interval + 1
 minetest.register_globalstep(function(dtime)
 	-- Only check per interval
