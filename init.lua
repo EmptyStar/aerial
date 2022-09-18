@@ -459,8 +459,7 @@ minetest.register_globalstep(function(dtime)
 		end
 
 		-- Can't fly or jump boost when exhausted
-		local exhausted = flight.stamina:exhausted(flight)
-		if exhausted then
+		if flight.stamina:exhausted(flight) then
 			if flight.state ~= Flight.EXHAUSTED then
 				flight:stop()
 				flight:revoke()
