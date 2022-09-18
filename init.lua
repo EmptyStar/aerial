@@ -26,7 +26,7 @@ local dependencies = {
 			and minetest.get_modpath("stamina")
 			and minetest.global_exists("stamina")
 		),
-		cost_per_second = tonumber(minetest.settings:get("aerial_stamina_per_second") or 4),
+		cost_per_second = tonumber(minetest.settings:get("aerial_stamina_per_second") or 16),
 		flight_lvl = tonumber(minetest.settings:get("aerial_stamina_exhaustion_threshold") or 4)
 	},
 	player_monoids = {
