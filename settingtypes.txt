@@ -18,3 +18,12 @@ aerial_wings_diamond (Enable diamond wings?) bool true
 
 # The number of milliseconds between player flight checks. Lower values make flight more responsive but increase load on the server; higher values will cause less stress on the server but may cause players to notice delays in flight-related movements.
 aerial_flight_tick_ms (Milliseconds per flight tick) int 125 50 1000
+
+# Enable or disable Stamina integration
+aerial_stamina_enabled (Enable Stamina integration?) bool true
+
+# How much stamina is drained per second of flying
+aerial_stamina_per_second (Stamina loss per second of flying) int 16 0 100
+
+# The minimum amount of stamina required for a player to be able to fly
+aerial_stamina_exhaustion_threshold (Minimum saturation needed to fly) int 4 0 20
