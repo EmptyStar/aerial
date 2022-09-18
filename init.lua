@@ -292,7 +292,7 @@ Flight = {
 				flight.state = Flight.FLYING
 
 				-- Animate wings while in flight
-				flight.entity:set_animation({x = 0, y = 19}, 24)
+				flight.entity:set_animation({x = 0, y = 19}, flight.sprinting and 48 or 24)
 			end,
 
 			-- Stop flying
@@ -394,18 +394,26 @@ armor:register_on_unequip(function(player, index, stack)
 	end
 end)
 
--- Register handler for when players begin to sprint
+-- Register handler for player sprinting
 if dependencies.stamina.enabled then
 	stamina.register_on_sprinting(function(player,sprinting)
 		local flight = aerial.flight[player:get_player_name()]
 		if flight.state == Flight.FLYING then
 			if sprinting then
-				-- Flap those wings!
-				flight.entity:set_animation({x = 0, y = 19}, 48)
+				if not flight.sprinting then
+					-- Flap those wings!
+					flight.entity:set_animation({x = 0, y = 19}, 48)
+					flight.sprinting = true
+				end
 			else
-				-- Normal flapping
-				flight.entity:set_animation({x = 0, y = 19}, 24)
+				if flight.sprinting then
+					-- Normal flapping
+					flight.entity:set_animation({x = 0, y = 19}, 24)
+					flight.sprinting = false
+				end
 			end
+		else
+			flight.sprinting = sprinting
 		end
 	end)
 end
