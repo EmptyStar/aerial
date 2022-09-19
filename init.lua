@@ -206,7 +206,6 @@ Flight = {
 					player:set_physics_override({ jump = newjump })
 					armor.def[flight.player:get_player_name()].jump = newjump
 					flight.applied_jump = true
-					minetest.log("applied jump " .. flight.wing.jump)
 				end
 			end,
 
@@ -219,7 +218,6 @@ Flight = {
 					player:set_physics_override({ jump = newjump })
 					armor.def[flight.player:get_player_name()].jump = newjump
 					flight.applied_jump = false
-					minetest.log("removed jump " .. flight.wing.jump)
 				end
 			end,
 
