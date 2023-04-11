@@ -425,7 +425,7 @@ minetest.register_on_leaveplayer(Flight.delete)
 -- Node flight grounding detection
 local function nodesAreGrounding(coords)
 	for _,coord in ipairs(coords) do
-		if minetest.registered_nodes[minetest.get_node(coord).name].walkable then
+		if minetest.registered_nodes[minetest.get_node(coord).name] and minetest.registered_nodes[minetest.get_node(coord).name].walkable then
 			return true
 		end
 	end
@@ -434,7 +434,7 @@ end
 
 -- Node liquid detection
 local function nodeIsLiquid(coords)
-	return minetest.registered_nodes[minetest.get_node(coords).name].liquidtype ~= "none"
+	return minetest.registered_nodes[minetest.get_node(coords).name] and minetest.registered_nodes[minetest.get_node(coords).name].liquidtype ~= "none" or false
 end
 
 -- Flight detection and state management
