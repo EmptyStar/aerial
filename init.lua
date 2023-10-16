@@ -48,7 +48,7 @@ aerial.register_wings = function(material,description,flammable,jump,flyspeed)
 	-- Define wing values
 	local wingname = aerial.name .. ":wings_" .. material
 	local wing = {
-		description = S(description),
+		description = description,
 		inventory_image = "aerial_inv_wings_" .. material .. ".png",
 		groups = {
 			armor_wings = 1,
@@ -116,32 +116,32 @@ end
 
 -- Create wood wings
 if armor.materials.wood and minetest.settings:get_bool("aerial_wings_wood",true) then
-	aerial.register_wings("wood","Wooden Wings",1,0,0)
+	aerial.register_wings("wood",S("Wooden Wings"),1,0,0)
 end
 
 -- Create cactus wings
 if armor.materials.cactus and minetest.settings:get_bool("aerial_wings_cactus",true) then
-	aerial.register_wings("cactus","Cactus Wings",1,0,0)
+	aerial.register_wings("cactus",S("Cactus Wings"),1,0,0)
 end
 
 -- Create bronze wings
 if armor.materials.bronze and minetest.settings:get_bool("aerial_wings_bronze",true) then
-	aerial.register_wings("bronze","Bronze Wings",0,0.5,-0.1)
+	aerial.register_wings("bronze",S("Bronze Wings"),0,0.5,-0.1)
 end
 
 -- Create steel wings
 if armor.materials.steel and minetest.settings:get_bool("aerial_wings_steel",true) then
-	aerial.register_wings("steel","Steel Wings",0,0.6,0.5)
+	aerial.register_wings("steel",S("Steel Wings"),0,0.6,0.5)
 end
 
 -- Create gold wings
 if armor.materials.gold and minetest.settings:get_bool("aerial_wings_gold",true) then
-	aerial.register_wings("gold","Golden Wings",0,1,1.4)
+	aerial.register_wings("gold",S("Golden Wings"),0,1,1.4)
 end
 
 -- Create diamond wings
 if armor.materials.diamond and minetest.settings:get_bool("aerial_wings_diamond",true) then
-	aerial.register_wings("diamond","Diamond Wings",0,1.5,2)
+	aerial.register_wings("diamond",S("Diamond Wings"),0,1.5,2)
 end
 
 --[[
