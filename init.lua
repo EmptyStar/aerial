@@ -158,8 +158,17 @@ Flight = {
 	EXHAUSTED = 4,
 
 	-- Flight object getter
-	get = function(player)
-		return aerial.flight[player:get_player_name()]
+	get = function(player, no_create)
+		local playername = player:get_player_name()
+		local retval = aerial.flight[playername]
+		if no_create then
+			return retval
+		end
+		if not retval then
+			Flight.new(player)
+			retval = aerial.flight[playername]
+		end
+		return retval
 	end,
 
 	-- Flight 'constructor'
@@ -360,6 +369,11 @@ Flight = {
 
 	-- Flight 'deconstructor'
 	delete = function(player)
+		local playername = player:get_player_name()
+		flight = aerial.flight[playername]
+		if flight and flight.state ~= Flight.NO_WINGS then
+			flight:unequip(nil, false)
+		end
 		aerial.flight[player:get_player_name()] = nil
 	end
 }
@@ -383,11 +397,13 @@ end)
 armor:register_on_unequip(function(player, index, stack)
 	local wing = aerial.wings[stack:get_name()]
 	if wing then
-		local flight = Flight.get(player)
-		if flight.swapped then
-			flight.swapped = false
-		else
-			flight:unequip(wing)
+		local flight = Flight.get(player, true)
+		if flight then
+			if flight.swapped then
+				flight.swapped = false
+			else
+				flight:unequip(wing)
+			end
 		end
 	end
 end)
@@ -417,7 +433,9 @@ if dependencies.stamina.enabled then
 end
 
 -- Register joined players with flight tracker; on_equip gets called after
-minetest.register_on_joinplayer(Flight.new)
+minetest.register_on_joinplayer(function(player)
+	Flight.get(player) -- also creates Flight instance
+end)
 
 -- Remove disconnected players from flight tracker
 minetest.register_on_leaveplayer(Flight.delete)
