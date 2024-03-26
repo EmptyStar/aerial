@@ -149,234 +149,234 @@ end
 ]]
 
 -- Flight class
-Flight = {
+local Flight = {
 	-- Flight state enum values
 	NO_WINGS = 0,
 	GROUNDED = 1,
 	FLYING = 2,
 	SUBMERGED = 3,
 	EXHAUSTED = 4,
+}
 
-	-- Flight object getter
-	get = function(player, no_create)
-		local playername = player:get_player_name()
-		local retval = aerial.flight[playername]
-		if no_create then
-			return retval
-		end
-		if not retval then
-			Flight.new(player)
-			retval = aerial.flight[playername]
-		end
+-- Flight object getter
+Flight.get = function(player, no_create)
+	local playername = player:get_player_name()
+	local retval = aerial.flight[playername]
+	if no_create then
 		return retval
-	end,
+	end
+	if not retval then
+		Flight.new(player)
+		retval = aerial.flight[playername]
+	end
+	return retval
+end
 
-	-- Flight 'constructor'
-	new = function(player)
-		local playername = player:get_player_name()
-		aerial.flight[playername] = {
-			player = player,
-			wing = nil,
-			speed = 0,
-			state = Flight.NO_WINGS,
-			entity = nil,
-			swapped = false,
+-- Flight 'constructor'
+Flight.new = function(player)
+	local playername = player:get_player_name()
+	aerial.flight[playername] = {
+		player = player,
+		wing = nil,
+		speed = 0,
+		state = Flight.NO_WINGS,
+		entity = nil,
+		swapped = false,
 
-			-- Add flight speed to player
-			add_speed = dependencies.player_monoids.enabled and function(flight)
-				player_monoids.speed:add_change(flight.player,1 + flight.wing.flyspeed,"aerial:speed")
-			end or function(flight)
-				if not flight.applied_speed then
-					local newspeed = player:get_physics_override().speed + flight.wing.flyspeed
-					player:set_physics_override({ speed = newspeed })
-					armor.def[flight.player:get_player_name()].speed = newspeed
-					flight.applied_speed = true
-				end
-			end,
+		-- Add flight speed to player
+		add_speed = dependencies.player_monoids.enabled and function(flight)
+			player_monoids.speed:add_change(flight.player,1 + flight.wing.flyspeed,"aerial:speed")
+		end or function(flight)
+			if not flight.applied_speed then
+				local newspeed = player:get_physics_override().speed + flight.wing.flyspeed
+				player:set_physics_override({ speed = newspeed })
+				armor.def[flight.player:get_player_name()].speed = newspeed
+				flight.applied_speed = true
+			end
+		end,
 
-			-- Remove flight speed from player
-			remove_speed = dependencies.player_monoids.enabled and function(flight)
-				player_monoids.speed:del_change(flight.player,"aerial:speed")
-			end or function(flight)
-				if flight.applied_speed then
-					local newspeed = player:get_physics_override().speed - flight.wing.flyspeed
-					player:set_physics_override({ speed = newspeed })
-					armor.def[flight.player:get_player_name()].speed = newspeed
-					flight.applied_speed = false
-				end
-			end,
+		-- Remove flight speed from player
+		remove_speed = dependencies.player_monoids.enabled and function(flight)
+			player_monoids.speed:del_change(flight.player,"aerial:speed")
+		end or function(flight)
+			if flight.applied_speed then
+				local newspeed = player:get_physics_override().speed - flight.wing.flyspeed
+				player:set_physics_override({ speed = newspeed })
+				armor.def[flight.player:get_player_name()].speed = newspeed
+				flight.applied_speed = false
+			end
+		end,
 
-			-- Add jump height to player
-			add_jump = dependencies.player_monoids.enabled and function(flight)
-				player_monoids.jump:add_change(flight.player,1 + flight.wing.jump,"aerial:jump")
-			end or function(flight)
-				if not flight.applied_jump then
-					local newjump = player:get_physics_override().jump + flight.wing.jump
-					player:set_physics_override({ jump = newjump })
-					armor.def[flight.player:get_player_name()].jump = newjump
-					flight.applied_jump = true
-				end
-			end,
+		-- Add jump height to player
+		add_jump = dependencies.player_monoids.enabled and function(flight)
+			player_monoids.jump:add_change(flight.player,1 + flight.wing.jump,"aerial:jump")
+		end or function(flight)
+			if not flight.applied_jump then
+				local newjump = player:get_physics_override().jump + flight.wing.jump
+				player:set_physics_override({ jump = newjump })
+				armor.def[flight.player:get_player_name()].jump = newjump
+				flight.applied_jump = true
+			end
+		end,
 
-			-- Remove jump height from player
-			remove_jump = dependencies.player_monoids.enabled and function(flight)
-				player_monoids.jump:del_change(flight.player,"aerial:jump")
-			end or function(flight)
-				if flight.applied_jump then
-					local newjump = player:get_physics_override().jump - flight.wing.jump
-					player:set_physics_override({ jump = newjump })
-					armor.def[flight.player:get_player_name()].jump = newjump
-					flight.applied_jump = false
-				end
-			end,
+		-- Remove jump height from player
+		remove_jump = dependencies.player_monoids.enabled and function(flight)
+			player_monoids.jump:del_change(flight.player,"aerial:jump")
+		end or function(flight)
+			if flight.applied_jump then
+				local newjump = player:get_physics_override().jump - flight.wing.jump
+				player:set_physics_override({ jump = newjump })
+				armor.def[flight.player:get_player_name()].jump = newjump
+				flight.applied_jump = false
+			end
+		end,
 
-			-- Equip wings
-			equip = function(flight,wing)
-				-- Unequip existing wings with swap=true if replaced with new wings
-				if flight.wing then
-					flight:unequip(flight.wing,true)
-				end
+		-- Equip wings
+		equip = function(flight,wing)
+			-- Unequip existing wings with swap=true if replaced with new wings
+			if flight.wing then
+				flight:unequip(flight.wing,true)
+			end
 
-				-- Make wings model visible on player
-				local wings_entity = minetest.add_entity(player:get_pos(),wing.name)
-				wings_entity:set_attach(player, '', {x=0,y=0.75,z=-2.75})
+			-- Make wings model visible on player
+			local wings_entity = minetest.add_entity(player:get_pos(),wing.name)
+			wings_entity:set_attach(player, '', {x=0,y=0.75,z=-2.75})
 
-				-- Set flight values
-				flight.wing = wing
-				flight.entity = wings_entity
-				flight.state = Flight.GROUNDED
+			-- Set flight values
+			flight.wing = wing
+			flight.entity = wings_entity
+			flight.state = Flight.GROUNDED
 
-				-- Add jump height boost to player
-				flight:add_jump()
+			-- Add jump height boost to player
+			flight:add_jump()
 
-				-- Grant flight if wings are capable of flight, revoke flight otherwise
-				if not flight:grant() then
-					flight:revoke()
-				end
+			-- Grant flight if wings are capable of flight, revoke flight otherwise
+			if not flight:grant() then
+				flight:revoke()
+			end
 
-				-- Prevent fall damage due to feather fall lag
+			-- Prevent fall damage due to feather fall lag
+			local groups = player:get_armor_groups()
+			groups.fall_damage_add_percent = -9001
+			player:set_armor_groups(groups)
+		end,
+
+		-- Unequip wings
+		unequip = function(flight,item,swap)
+			-- Remove existing wing model from player
+			flight.entity:remove()
+
+			-- Remove jump height boost from player
+			flight:remove_jump()
+
+			-- Terminate flight if other wings were not swapped in
+			if not swap then
+				-- Stop flight
+				flight:stop()
+
+				-- Remove flight values
+				flight.state = Flight.NO_WINGS
+				flight.entity = nil
+				flight.wing = nil
+
+				-- Revoke fly privilege
+				flight:revoke()
+
+				-- Remove fall damage protection
 				local groups = player:get_armor_groups()
-				groups.fall_damage_add_percent = -9001
+				groups.fall_damage_add_percent = nil
 				player:set_armor_groups(groups)
-			end,
+			else
+				flight.swapped = true
+			end
+		end,
 
-			-- Unequip wings
-			unequip = function(flight,item,swap)
-				-- Remove existing wing model from player
-				flight.entity:remove()
+		-- Start flying
+		start = function(flight)
+			-- Add wing speed
+			flight:add_speed()
 
-				-- Remove jump height boost from player
-				flight:remove_jump()
+			-- Set flight state
+			flight.state = Flight.FLYING
 
-				-- Terminate flight if other wings were not swapped in
-				if not swap then
-					-- Stop flight
-					flight:stop()
+			-- Animate wings while in flight
+			flight.entity:set_animation({x = 0, y = 19}, flight.sprinting and 48 or 24)
+		end,
 
-					-- Remove flight values
-					flight.state = Flight.NO_WINGS
-					flight.entity = nil
-					flight.wing = nil
+		-- Stop flying
+		stop = function(flight)
+			-- Remove wing speed
+			flight:remove_speed()
 
-					-- Revoke fly privilege
-					flight:revoke()
+			-- Set flight state
+			flight.state = Flight.GROUNDED
 
-					-- Remove fall damage protection
-					local groups = player:get_armor_groups()
-					groups.fall_damage_add_percent = nil
-					player:set_armor_groups(groups)
-				else
-					flight.swapped = true
-				end
-			end,
+			-- Wings are still when not in flight
+			flight.entity:set_animation()
+		end,
 
-			-- Start flying
-			start = function(flight)
-				-- Add wing speed
-				flight:add_speed()
-
-				-- Set flight state
-				flight.state = Flight.FLYING
-
-				-- Animate wings while in flight
-				flight.entity:set_animation({x = 0, y = 19}, flight.sprinting and 48 or 24)
-			end,
-
-			-- Stop flying
-			stop = function(flight)
-				-- Remove wing speed
-				flight:remove_speed()
-
-				-- Set flight state
-				flight.state = Flight.GROUNDED
-
-				-- Wings are still when not in flight
-				flight.entity:set_animation()
-			end,
-
-			-- Grant fly privilege to player if flyspeed is non-zero
-			grant = function(flight)
-				if flight.wing.can_fly then
-					local privs = minetest.get_player_privs(playername)
-					privs.fly = true
-					minetest.set_player_privs(playername, privs)
-					return true
-				else
-					return false
-				end
-			end,
-
-			-- Revoke fly privilege from player
-			revoke = function(flight)
+		-- Grant fly privilege to player if flyspeed is non-zero
+		grant = function(flight)
+			if flight.wing.can_fly then
 				local privs = minetest.get_player_privs(playername)
-				privs.fly = nil
+				privs.fly = true
 				minetest.set_player_privs(playername, privs)
-			end,
+				return true
+			else
+				return false
+			end
+		end,
 
-			-- Stamina processing associated with flight
-			stamina = dependencies.stamina.enabled and dependencies.stamina.cost_per_second > 0 and {
-				stime = 0,
-				tick = function(self,flight,dtime)
-					-- Count time only if player is flying
-					if flight.state == Flight.FLYING then
-						self.stime = self.stime + dtime
-						-- Only exhaust payer if a full second or more of flying has passed
-						if self.stime >= 1 then
-							self.stime = self.stime % 1
-						else
-							return
-						end
+		-- Revoke fly privilege from player
+		revoke = function(flight)
+			local privs = minetest.get_player_privs(playername)
+			privs.fly = nil
+			minetest.set_player_privs(playername, privs)
+		end,
+
+		-- Stamina processing associated with flight
+		stamina = dependencies.stamina.enabled and dependencies.stamina.cost_per_second > 0 and {
+			stime = 0,
+			tick = function(self,flight,dtime)
+				-- Count time only if player is flying
+				if flight.state == Flight.FLYING then
+					self.stime = self.stime + dtime
+					-- Only exhaust payer if a full second or more of flying has passed
+					if self.stime >= 1 then
+						self.stime = self.stime % 1
 					else
 						return
 					end
+				else
+					return
+				end
 
-					-- Exhaust player
-					stamina.exhaust_player(player,dependencies.stamina.cost_per_second,"flight")
-				end,
-				exhausted = function(self,flight)
-					return stamina.get_saturation(flight.player) <= dependencies.stamina.flight_lvl
-				end
-			} or {
-				tick = function(self,flight,dtime)
-					-- no-op
-				end,
-				exhausted = function(self,flight)
-					return false
-				end
-			}
+				-- Exhaust player
+				stamina.exhaust_player(player,dependencies.stamina.cost_per_second,"flight")
+			end,
+			exhausted = function(self,flight)
+				return stamina.get_saturation(flight.player) <= dependencies.stamina.flight_lvl
+			end
+		} or {
+			tick = function(self,flight,dtime)
+				-- no-op
+			end,
+			exhausted = function(self,flight)
+				return false
+			end
 		}
-	end,
+	}
+end
 
-	-- Flight 'deconstructor'
-	delete = function(player)
-		local playername = player:get_player_name()
-		flight = aerial.flight[playername]
-		if flight and flight.state ~= Flight.NO_WINGS then
-			flight:unequip(nil, false)
-		end
-		aerial.flight[player:get_player_name()] = nil
+-- Flight 'deconstructor'
+Flight.delete = function(player)
+	local playername = player:get_player_name()
+	flight = aerial.flight[playername]
+	if flight and flight.state ~= Flight.NO_WINGS then
+		flight:unequip(nil, false)
 	end
-}
+	aerial.flight[player:get_player_name()] = nil
+end
 
 -- Register handler for stamina loss due to flying
 minetest.register_globalstep(function(dtime)
@@ -443,7 +443,8 @@ minetest.register_on_leaveplayer(Flight.delete)
 -- Node flight grounding detection
 local function nodesAreGrounding(coords)
 	for _,coord in ipairs(coords) do
-		if minetest.registered_nodes[minetest.get_node(coord).name] and minetest.registered_nodes[minetest.get_node(coord).name].walkable then
+		local node = minetest.registered_nodes[minetest.get_node(coord).name]
+		if node and node.walkable then
 			return true
 		end
 	end
@@ -452,7 +453,8 @@ end
 
 -- Node liquid detection
 local function nodeIsLiquid(coords)
-	return minetest.registered_nodes[minetest.get_node(coords).name] and minetest.registered_nodes[minetest.get_node(coords).name].liquidtype ~= "none" or false
+	local node = minetest.registered_nodes[minetest.get_node(coords).name]
+	return node and node.liquidtype ~= "none" or false
 end
 
 -- Flight detection and state management
