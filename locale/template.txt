@@ -1,0 +1,7 @@
+# textdomain: aerial
+Wooden Wings=
+Cactus Wings=
+Bronze Wings=
+Steel Wings=
+Golden Wings=
+Diamond Wings=
