@@ -31,7 +31,10 @@ local dependencies = {
 	},
 	player_monoids = {
 		enabled = minetest.get_modpath("player_monoids") and minetest.global_exists("player_monoids")
-	}
+	},
+	armor_monoid = {
+		enabled = minetest.get_modpath("armor_monoid") and minetest.global_exists("armor_monoid"),
+	},
 }
 
 --[[
@@ -58,7 +61,9 @@ aerial.register_wings = function(material,description,flammable,jump,flyspeed)
 			physics_jump = dependencies.player_monoids.enabled and 0 or jump,
 			flammable = flammable
 		},
-		armor_groups = {},
+		armor_groups = {
+			fall_damage_add_percent = 100, -- prevents fall damage if armor_monoid is enabled
+		},
 		damage_groups = {},
 		flyspeed = flyspeed,
 		jump = jump,
@@ -256,9 +261,11 @@ Flight.new = function(player)
 			end
 
 			-- Prevent fall damage due to feather fall lag
-			local groups = player:get_armor_groups()
-			groups.fall_damage_add_percent = -9001
-			player:set_armor_groups(groups)
+			if not dependencies.armor_monoid.enabled then
+				local groups = player:get_armor_groups()
+				groups.fall_damage_add_percent = -9001
+				player:set_armor_groups(groups)
+			end
 		end,
 
 		-- Unequip wings
@@ -283,9 +290,11 @@ Flight.new = function(player)
 				flight:revoke()
 
 				-- Remove fall damage protection
-				local groups = player:get_armor_groups()
-				groups.fall_damage_add_percent = nil
-				player:set_armor_groups(groups)
+				if not dependencies.armor_monoid.enabled then
+					local groups = player:get_armor_groups()
+					groups.fall_damage_add_percent = nil
+					player:set_armor_groups(groups)
+				end
 			else
 				flight.swapped = true
 			end
