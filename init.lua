@@ -37,6 +37,11 @@ local dependencies = {
 	},
 }
 
+-- Register fall_damage_add_percent armor group if armor_monoid is present
+if dependencies.armor_monoid.enabled then
+	armor:register_armor_group("fall_damage_add_percent",100)
+end
+
 --[[
 	Items
 ]]
